@@ -96,13 +96,14 @@ main(void)
 {
 	do {
 		int argc;
-		char *argv[ARG_MAX];
+		char *argv[ARG_MAX + 1]; // must be NULL terminated
 		int ret;
 
 		show_prompt();
 		argc = read_cmdline(argv);
 		if (argc <= 0)
 			continue;
+		argv[argc] = NULL;
 		ret = run_cmd(argc, argv);
 
 		free_argv(argc, argv);
