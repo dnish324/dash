@@ -58,8 +58,14 @@ read_cmdline(char *argv[]) {
 			break;
 
 		if ((j == 0) || (j % ALLOC_SIZE) == ALLOC_SIZE - 1) {
-			if (j == 0)
+			if (j == 0) {
+				if (i == ARG_MAX - 1) {
+					fprintf(stderr, "Too many arguments.\n");
+					free_argv(i, argv);
+					return -1;
+				}
 				argv[++i] = NULL;
+			}
 
 			len += ALLOC_SIZE;
 			ptr = realloc(argv[i], sizeof(char *) * len);
@@ -95,6 +101,8 @@ main(void)
 
 		show_prompt();
 		argc = read_cmdline(argv);
+		if (argc <= 0)
+			continue;
 		ret = run_cmd(argc, argv);
 
 		free_argv(argc, argv);
