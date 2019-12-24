@@ -20,6 +20,7 @@
 #include <stdbool.h>
 
 #define ARG_MAX	16
+#define ALLOC_SIZE 16
 
 static void
 show_prompt(void) {
@@ -39,7 +40,43 @@ free_argv(int argc, char **argv)
 
 static int
 read_cmdline(char *argv[]) {
-	return 0;
+	int i, j;
+	int argc = 0;
+	char c;
+	void *ptr;
+	int len;
+
+	i = -1;
+	j = len = 0;
+	while ((c = getchar()) != EOF) {
+		if ((c == ' ')) {
+			j = 0;
+			len = 0;
+			continue;
+		}
+		if (c == '\n')
+			break;
+
+		if ((j == 0) || (j % ALLOC_SIZE) == ALLOC_SIZE - 1) {
+			if (j == 0)
+				argv[++i] = NULL;
+
+			len += ALLOC_SIZE;
+			ptr = realloc(argv[i], sizeof(char *) * len);
+
+			if (ptr == NULL) {
+				free_argv(i, argv);
+				return -1;
+			}
+
+			argv[i] = ptr;
+		}
+
+		argv[i][j++] = c;
+		argv[i][j] = '\0';
+	}
+
+	return i + 1;
 }
 
 static int
