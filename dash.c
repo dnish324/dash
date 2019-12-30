@@ -89,7 +89,7 @@ read_cmdline(char *argv[]) {
 }
 
 static int
-run_cmd(int argc, char *argv[])
+run_cmd(int argc, char *argv[], char *envp[])
 {
 	int ret;
 	pid_t pid;
@@ -99,7 +99,7 @@ run_cmd(int argc, char *argv[])
 		return 0;
 
 	if ((pid = fork()) == 0) { /* child */
-		execve(argv[0], argv, NULL);
+		execve(argv[0], argv, envp);
 		exit(0);	//Not reached
 	} else if (pid > 0) { /* parent */
 		waitpid(pid, &status, 0);
@@ -112,7 +112,7 @@ run_cmd(int argc, char *argv[])
 }
 
 int
-main(void)
+main(int m_argc, char *m_argv[], char *m_envp[])
 {
 	do {
 		int argc;
@@ -124,7 +124,7 @@ main(void)
 		if (argc <= 0)
 			continue;
 		argv[argc] = NULL;
-		ret = run_cmd(argc, argv);
+		ret = run_cmd(argc, argv, m_envp);
 
 		free_argv(argc, argv);
 	} while (true);
