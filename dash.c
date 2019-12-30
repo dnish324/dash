@@ -18,6 +18,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define ARG_MAX	16
 #define ALLOC_SIZE 16
@@ -88,6 +91,23 @@ read_cmdline(char *argv[]) {
 static int
 run_cmd(int argc, char *argv[])
 {
+	int ret;
+	pid_t pid;
+	int status;
+
+	if (argc == 0)
+		return 0;
+
+	if ((pid = fork()) == 0) { /* child */
+		execve(argv[0], argv, NULL);
+		exit(0);	//Not reached
+	} else if (pid > 0) { /* parent */
+		waitpid(pid, &status, 0);
+	} else { /* error */
+		fprintf(stderr, "Failed to fork child.\n");
+		return -1;
+	}
+
 	return 0;
 }
 
