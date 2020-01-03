@@ -18,12 +18,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #define ARG_MAX	16
-#define ALLOC_SIZE 16
+
+static char *
+ltrim(char *str)
+{
+	char *c = str;
+	while (*c == ' ')
+		c++;
+	return c;
+}
+
+static char *
+rtrim(char *str)
+{
+	char *c = str + strlen(str);
+	while (*c == ' ')
+		*(c--) = '\0';
+	return str;
+}
 
 static void
 show_prompt(void) {
@@ -43,49 +61,27 @@ free_argv(int argc, char **argv)
 
 static int
 read_cmdline(char *argv[]) {
-	int i, j;
 	int argc = 0;
-	char c;
-	void *ptr;
-	int len;
+	int i;
+	char *cmdline;
+	char *s;
 
-	i = -1;
-	j = len = 0;
-	while ((c = getchar()) != EOF) {
-		if ((c == ' ')) {
-			j = 0;
-			len = 0;
-			continue;
-		}
-		if (c == '\n')
-			break;
+	scanf("%m[^\n]%*c", &cmdline);
 
-		if ((j == 0) || (j % ALLOC_SIZE) == ALLOC_SIZE - 1) {
-			if (j == 0) {
-				if (i == ARG_MAX - 1) {
-					fprintf(stderr, "Too many arguments.\n");
-					free_argv(i, argv);
-					return -1;
-				}
-				argv[++i] = NULL;
-			}
-
-			len += ALLOC_SIZE;
-			ptr = realloc(argv[i], sizeof(char *) * len);
-
-			if (ptr == NULL) {
-				free_argv(i, argv);
+	s = ltrim(rtrim(cmdline));
+	while (strlen(s) > 0) {
+		if (argc == ARG_MAX) {
+				fprintf(stderr, "Too many arguments.\n");
+				free_argv(argc - 1, argv);
 				return -1;
-			}
-
-			argv[i] = ptr;
 		}
-
-		argv[i][j++] = c;
-		argv[i][j] = '\0';
+		sscanf(s, "%ms", &argv[argc]);
+		s = ltrim(s + strlen(argv[argc]));
+		argc++;
 	}
 
-	return i + 1;
+	free(cmdline);
+	return argc;
 }
 
 static int
