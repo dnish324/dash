@@ -71,9 +71,9 @@ read_cmdline(char *argv[]) {
 	s = ltrim(rtrim(cmdline));
 	while (strlen(s) > 0) {
 		if (argc == ARG_MAX) {
-				fprintf(stderr, "Too many arguments.\n");
-				free_argv(argc - 1, argv);
-				return -1;
+			fprintf(stderr, "Too many arguments.\n");
+			free_argv(argc - 1, argv);
+			return -1;
 		}
 		sscanf(s, "%ms", &argv[argc]);
 		s = ltrim(s + strlen(argv[argc]));
